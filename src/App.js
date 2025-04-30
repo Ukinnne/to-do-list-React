@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const inputField = document.createElement('input');
   inputField.type = 'text';
   inputField.placeholder = 'Введите текст и нажмите Enter';
-  inputField.style.width = '100%';
+  inputField.style.width = '20%';
   inputField.style.marginBottom = '10px';
   inputField.style.padding = '8px';
   inputField.style.boxSizing = 'border-box';
