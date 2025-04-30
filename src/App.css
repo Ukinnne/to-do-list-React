@@ -1,38 +1,123 @@
-.App {
-  text-align: center;
+body {
+  color: #000;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  margin: 20px auto;
+  color: #000;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.task-input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border 0.3s;
+  color: #000;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.task-input:focus {
+  border-color: #5c6bc0;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(92, 107, 192, 0.2);
+}
+
+.tasks-list {
+  margin-top: 20px;
+}
+
+.task-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  color: #000;
 }
 
-.App-link {
-  color: #61dafb;
+.task-item:hover {
+  background: #f0f0f0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.task-text {
+  font-size: 16px;
+  flex-grow: 1;
+  color: #000;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-color-scheme: dark) {
+  body { 
+    background: #121212; 
+    color: #000; 
   }
-  to {
-    transform: rotate(360deg);
+  .container { 
+    background: #1e1e1e; 
+    color: #ffffff;
+  }
+  .task-text,
+  .task-input {
+    color: #000000;
+  }
+}
+
+.completed .task-text {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.remove-completed-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s;
+}
+
+.remove-completed-btn:hover {
+  background-color: #ff1744;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  from { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to { 
+    opacity: 0;
+    transform: translateX(-100px);
   }
 }

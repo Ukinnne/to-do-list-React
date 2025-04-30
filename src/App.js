@@ -1,73 +1,140 @@
-let container;
+import { useState, useEffect } from 'react';
+import './App.css';
 
-document.addEventListener('DOMContentLoaded', function() {
-  container = document.getElementById('container');
+function App() {
+  const [tasks, setTasks] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const inputField = document.createElement('input');
-  inputField.type = 'text';
-  inputField.placeholder = 'Введите текст и нажмите Enter';
-  inputField.style.width = '20%';
-  inputField.style.marginBottom = '10px';
-  inputField.style.padding = '8px';
-  inputField.style.boxSizing = 'border-box';
-  
-  container.appendChild(inputField);
-  inputField.focus();
+  // Загрузка задач из localStorage при монтировании компонента
+  useEffect(() => {
+    const loadTasks = () => {
+      try {
+        const savedTasks = localStorage.getItem('tasks');
+        if (savedTasks) {
+          const parsedTasks = JSON.parse(savedTasks);
+          // Проверяем структуру загруженных данных
+          if (Array.isArray(parsedTasks) && parsedTasks.every(task => 
+            typeof task === 'object' && 
+            'text' in task && 
+            'completed' in task &&
+            'id' in task
+          )) {
+            setTasks(parsedTasks);
+          } else {
+            console.warn('Некорректный формат данных в localStorage');
+            localStorage.removeItem('tasks');
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка при чтении из localStorage:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  inputField.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      const text = inputField.value.trim();
-      if (text) {
-        addListItem(text);
-        inputField.value = '';
+    loadTasks();
+  }, []);
+
+  // Сохранение задач в localStorage при их изменении
+  useEffect(() => {
+    if (!isLoading) {
+      try {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      } catch (error) {
+        console.error('Ошибка при записи в localStorage:', error);
       }
     }
-  });
+  }, [tasks, isLoading]);
 
-  const savedTasks = localStorage.getItem('savedTasks');
-  if (savedTasks) {
-    JSON.parse(savedTasks).forEach(task => addListItem(task));
-  }
-});
-
-function addListItem(text) {
-  const listItem = document.createElement('div');
-  listItem.style.display = 'flex';
-  listItem.style.alignItems = 'center';
-  listItem.style.marginBottom = '5px';
-
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.style.marginRight = '10px';
-
-  checkbox.addEventListener('change', function() {
-    if (this.checked) {
-      listItem.style.transition = 'opacity 0.3s';
-      listItem.style.opacity = '0';
-      setTimeout(() => {
-        container.removeChild(listItem);
-        saveToLocalStorage();
-      }, 300);
+  const handleAddTask = () => {
+    const text = inputValue.trim();
+    if (text) {
+      const newTask = {
+        text,
+        completed: false,
+        id: Date.now() // уникальный идентификатор
+      };
+      setTasks([...tasks, newTask]);
+      setInputValue('');
     }
-  });
+  };
 
-  const textSpan = document.createElement('span');
-  textSpan.textContent = text;
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleAddTask();
+    }
+  };
 
-  listItem.appendChild(checkbox);
-  listItem.appendChild(textSpan);
+  const handleToggleTask = (id) => {
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
 
-  container.insertBefore(listItem, container.querySelector('input').nextSibling);
-  saveToLocalStorage();
+  const handleRemoveCompleted = () => {
+    const completedTasks = tasks.filter(task => task.completed);
+    if (completedTasks.length === 0) return;
+
+    // Анимация удаления
+    completedTasks.forEach(task => {
+      const element = document.querySelector(`.task-item[data-id="${task.id}"]`);
+      if (element) {
+        element.classList.add('fade-out');
+      }
+    });
+
+    setTimeout(() => {
+      setTasks(tasks.filter(task => !task.completed));
+    }, 300);
+  };
+
+  if (isLoading) {
+    return <div className="container loading">Загрузка задач...</div>;
+  }
+
+  return (
+    <div className="container">
+      <h1 className="tasks-title">Задачи:</h1>
+      <input
+        type="text"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyPress={handleKeyPress}
+        placeholder="Введите текст и нажмите Enter"
+        className="task-input"
+      />
+      <div className="tasks-list">
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <div 
+              key={task.id} 
+              className={`task-item ${task.completed ? 'completed' : ''}`}
+              data-id={task.id}
+            >
+              <input
+                type="checkbox"
+                checked={task.completed}
+                onChange={() => handleToggleTask(task.id)}
+                className="task-checkbox"
+              />
+              <span className="task-text">{task.text}</span>
+            </div>
+          ))
+        ) : (
+          <div className="empty-state">Нет задач</div>
+        )}
+      </div>
+      {tasks.some(task => task.completed) && (
+        <button 
+          onClick={handleRemoveCompleted}
+          className="remove-completed-btn"
+        >
+          Удалить выполненные ({tasks.filter(t => t.completed).length})
+        </button>
+      )}
+    </div>
+  );
 }
 
-function saveToLocalStorage() {
-  const tasks = [];
-  const items = container.querySelectorAll('div[style*="display: flex"]');
-  
-  items.forEach(item => {
-    tasks.push(item.querySelector('span').textContent);
-  });
-  
-  localStorage.setItem('savedTasks', JSON.stringify(tasks));
-}
+export default App;
