@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+
   const container = document.getElementById('container');
 
   const inputField = document.createElement('input');
@@ -23,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function addListItem(text) {
+    container.insertBefore(listItem, inputField.nextSibling);
+    saveToLocalStorage();
     const listItem = document.createElement('div');
     listItem.style.display = 'flex';
     listItem.style.alignItems = 'center';
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listItem.style.opacity = '0';
         setTimeout(() => {
           container.removeChild(listItem);
+          saveToLocalStorage();
         }, 300);
       }
     });
@@ -51,3 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
     container.insertBefore(listItem, inputField.nextSibling);
   }
 });
+
+function saveToLocalStorage() {
+  const tasks = [];
+  const items = container.querySelectorAll('div[style*="display: flex"]');
+  
+  items.forEach(item => {
+    const text = item.querySelector('span').textContent;
+    tasks.push(text);
+  });
+  
+  localStorage.setItem('savedTasks', JSON.stringify(tasks));
+}
